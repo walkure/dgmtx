@@ -1,0 +1,11 @@
+# /etc/systemd/system/dgmtx.service
+[Unit]
+Description = DoCoMo Mail to GMail Transfer service
+
+[Service]
+Type = oneshot
+ExecStart = /home/walkure/dgmtx/dgmtx.py
+WorkingDirectory = /home/walkure/dgmtx/
+
+[Install]
+WantedBy = multi-user.target

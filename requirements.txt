@@ -1,0 +1,2 @@
+IMAPClient>=2.2.0
+oauthlib>=3.1.0

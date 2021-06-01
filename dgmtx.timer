@@ -1,0 +1,9 @@
+# /etc/systemd/system/dgmtx.timer
+[Unit]
+Description = DoCoMo Mail To GMail Transfer Timer
+
+[Timer]
+OnUnitActiveSec = 5m
+
+[Install]
+WantedBy = timers.target

@@ -1,0 +1,9 @@
+[gmail]
+client_id = GMail API OAuth2 Client ID
+client_secret = GMail API OAuth2 Client ID
+refresh_token = GMail API OAuth2 Refresh Token
+address = GMail Address
+
+[spmode]
+user = d account id
+pass = IMAP password
