@@ -7,3 +7,10 @@ address = GMail Address
 [spmode]
 user = d account id
 pass = IMAP password
+
+[outlook]
+user = Microsoft Account
+pass = Password
+
+[slack]
+endpoint = incoming webhook URL

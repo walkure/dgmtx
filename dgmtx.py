@@ -3,7 +3,9 @@
 from imapclient import IMAPClient
 from imapclient.exceptions import LoginError
 from oauthlib.oauth2 import BackendApplicationClient
-import urllib.request
+from email.parser import BytesParser
+from email.policy import default
+from urllib import request, error
 import json
 import pathlib
 import configparser
@@ -18,7 +20,17 @@ conf.read('./config.ini', 'UTF-8')
 laststate_file = pathlib.Path('./laststate.json')
 
 
-def fetch_folder(source, dest, folder, past_uid):
+def get_access_token(client_id, client_secret, refresh_token):
+    oauth = BackendApplicationClient(client_id)
+    url, headers, body = oauth.prepare_refresh_token_request('https://accounts.google.com/o/oauth2/token',
+                                                             client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
+    req = request.Request(url, body.encode('us-ascii'), headers=headers)
+    with request.urlopen(req) as res:
+        obj = json.loads(res.read().decode('us-ascii'))
+    return obj['access_token']
+
+
+def fetch_folder(source, dest1, dest2, folder, past_uid):
     status = source.folder_status(folder, ['UIDNEXT'])
     print("Folder:", folder, " past_uid:",
           past_uid, ' uidnext:', status[b'UIDNEXT'])
@@ -29,60 +41,100 @@ def fetch_folder(source, dest, folder, past_uid):
 
     print(uids)
     if len(uids) == 0:
-        return past_uid
+        return past_uid, None
 
+    new_arrivals = []
     for uid in uids:
-        transfer_mail(source, dest, folder, uid)
+        new_arrivals.append(transfer_mail(source, dest1, dest2, folder, uid))
 
-    return uids[-1] + 1
+    return uids[-1] + 1, new_arrivals
 
 
-def transfer_mail(source, dest, folder, uid):
-    resp = source.fetch([uid], ['RFC822', 'INTERNALDATE'])
+def transfer_mail(source, dest1, dest2, folder, uid):
+    resp = source.fetch([uid], ['RFC822', 'INTERNALDATE',
+                        'BODY[HEADER.FIELDS (SUBJECT FROM)]'])
     body = resp[uid][b'RFC822'].decode('us-ascii')
     idate = resp[uid][b'INTERNALDATE']
+    headers = BytesParser(policy=default).parsebytes(
+        resp[uid][b'BODY[HEADER.FIELDS (SUBJECT FROM)]'], True)
 
-    if not dest.folder_exists(folder):
-        dest.create_folder(folder)
+    if not dest1.folder_exists(folder):
+        dest1.create_folder(folder)
     print('append uid:', uid)
     # dest.append(folder,body,flags=(br"\Recent"),msg_time=idate)
-    dest.append(folder, body, msg_time=idate)
+    dest1.append(folder, body, msg_time=idate)
+
+    if dest2 is not None:
+        dest2.append('INBOX', body, msg_time=idate)
+
+    return {'subject': headers['subject'], 'from': headers['from'], 'folder': folder}
 
 
-def get_access_token(client_id, client_secret, refresh_token):
-    oauth = BackendApplicationClient(client_id)
-    url, headers, body = oauth.prepare_refresh_token_request('https://accounts.google.com/o/oauth2/token',
-                                                             client_id=client_id, client_secret=client_secret, refresh_token=refresh_token)
-    req = urllib.request.Request(url, body.encode('us-ascii'), headers=headers)
-    with urllib.request.urlopen(req) as res:
-        obj = json.loads(res.read().decode('us-ascii'))
-    return obj['access_token']
+def send_new_arrival_notify(new_arrivals):
+    if len(new_arrivals) == 0:
+        return
+    if 'slack' not in conf:
+        return
+    obj = {'attachments': []}
+    for datum in new_arrivals:
+        block = {'type': 'section', 'fields': []}
+        block['fields'].append(
+            {'title': 'IN', 'value': datum['folder'], 'short': True})
+        block['fields'].append(
+            {'title': 'From', 'value': datum['from'], 'short': True})
+        block['fields'].append(
+            {'title': '件名', 'value': datum['subject'], 'short': True})
+        obj["attachments"].append(block)
+
+    payload = json.dumps(obj).encode('utf-8')
+
+    req = request.Request(conf['slack']['endpoint'], data=payload,
+                          method='POST', headers={'content-type': 'application/json', "User-Agent": ""})
+
+    try:
+        with request.urlopen(req) as response:
+            body = response.read().decode('utf-8')
+            print(body)
+    except error.HTTPError as e:
+        print("Error:"+e)
 
 
-if laststate_file.exists():
-    with open(str(laststate_file)) as file:
-        last_states = json.load(file)
-else:
-    last_states = {}
+def login_gmail(client, access_token):
+    if access_token is None:
+        print('fetch access token')
+        access_token = get_access_token(
+            conf['gmail']['client_id'], conf['gmail']['client_secret'], conf['gmail']['refresh_token'])
 
-with IMAPClient(host='imap.spmode.ne.jp') as source:
-    source.login(conf['spmode']['user'], conf['spmode']['pass'])
+    try:
+        client.oauthbearer_login(conf['gmail']['address'], access_token)
+        return access_token
 
-    with IMAPClient(host='imap.googlemail.com') as dest:
+    except LoginError:
+        print('update access token')
+        access_token = get_access_token(
+            conf['gmail']['client_id'], conf['gmail']['client_secret'], conf['gmail']['refresh_token'])
+        client.oauthbearer_login(conf['gmail']['address'], access_token)
+        return access_token
 
-        if 'access_token' not in last_states:
-            print('fetch access token')
-            last_states['access_token'] = get_access_token(conf['gmail']['client_id'], conf['gmail']['client_secret'], conf['gmail']['refresh_token'])
-        
-        try:
-            dest.oauthbearer_login(conf['gmail']['address'],last_states['access_token'])
-        except LoginError as e:
-            print('update access token')
-            last_states['access_token'] = get_access_token(conf['gmail']['client_id'], conf['gmail']['client_secret'], conf['gmail']['refresh_token'])
-            dest.oauthbearer_login(conf['gmail']['address'],last_states['access_token'])
-            
+
+def main():
+    if laststate_file.exists():
+        with open(str(laststate_file)) as file:
+            last_states = json.load(file)
+    else:
+        last_states = {}
+
+    new_arrivals_all = []
+    with IMAPClient(host='imap.spmode.ne.jp') as source, \
+            IMAPClient(host='imap.googlemail.com') as gmail, \
+            IMAPClient(host='outlook.office365.com') as office:
+
+        source.login(conf['spmode']['user'], conf['spmode']['pass'])
+        last_states['access_token'] = login_gmail(
+            gmail, last_states['access_token'])
+        office.login(conf['outlook']['user'], conf['outlook']['pass'])
+
         # print(dest.capabilities())
-
         for folder in source.list_folders():
             if folder[2] in ignore_folders:
                 continue
@@ -91,9 +143,18 @@ with IMAPClient(host='imap.spmode.ne.jp') as source:
             if folder[2] in last_states:
                 last_uid = last_states[folder[2]]
 
-            uid = fetch_folder(source, dest, folder[2], last_uid)
+            uid, new_arrivals = fetch_folder(
+                source, gmail, office, folder[2], last_uid)
             print('new last uid:', uid)
             last_states[folder[2]] = uid
+            if new_arrivals is not None:
+                new_arrivals_all += new_arrivals
 
-with open(str(laststate_file), 'w') as file:
-    json.dump(last_states, file)
+    with open(str(laststate_file), 'w') as file:
+        json.dump(last_states, file)
+
+    send_new_arrival_notify(new_arrivals_all)
+
+
+if __name__ == "__main__":
+    main()
