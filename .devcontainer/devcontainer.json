@@ -8,6 +8,9 @@
         "ms-python.python",
         "ms-python.vscode-pylance"
     ],
+    "remoteEnv": {
+        "TZ": "Asia/Tokyo"
+    },
     "settings": {
         "terminal.integrated.profiles.linux": {
             "bash": {
