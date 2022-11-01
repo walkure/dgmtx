@@ -1,7 +1,7 @@
 {
     "name": "dev",
     "dockerFile": "Dockerfile",
-    "postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh ; ./.devcontainer/postCreateCommand.sh",
+    "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
     "extensions": [
         "ms-azuretools.vscode-docker",
         "ms-python.python",
