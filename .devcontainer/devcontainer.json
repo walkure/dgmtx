@@ -1,6 +1,11 @@
 {
     "name": "dev",
-    "dockerFile": "Dockerfile",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/python:1.0.10": {
+            "version": "3.11"
+        }
+    },
     "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
     "extensions": [
         "ms-azuretools.vscode-docker",
