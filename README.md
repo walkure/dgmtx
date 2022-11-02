@@ -3,9 +3,10 @@ NTT docomoのキャリアメールであるドコモメールを、フォルダ�
 
 # 新着通知
 GMailはIMAPでメールを投入してもスマホに新着通知を送ってくれないので、以下2種類の通知を実装しています。
+どちらもオプションで、設定がなければ行いません。
 
 - Outlook.com に転送して、[Androidアプリ](https://play.google.com/store/apps/details?id=com.microsoft.office.outlook)に通知を飛ばしてもらう。
-- Slackのincoming webhookを叩く(オプション)
+- Slackのincoming webhookを叩く
 
 Outlook.comのAndroidアプリは新着通知がなぜかINBOXフォルダ(受信トレイ)しか飛ばないので、
 ドコモメール側でどのフォルダに振り分けていてもOutlook.comのメールアカウントでは受信トレイに転送されます。
