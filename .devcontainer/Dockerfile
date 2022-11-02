@@ -11,6 +11,7 @@ RUN bash -c "$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode-de
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
+USER vscode
 
 RUN pip install -U setuptools flake8 black
 ENV PATH /root/.local/bin:$PATH
