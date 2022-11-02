@@ -145,7 +145,10 @@ def main():
 
         source.login(conf["spmode"]["user"], conf["spmode"]["pass"])
         last_states["access_token"] = login_gmail(gmail, last_states["access_token"])
+        office_or_none = None
+        if "outlook" in conf:
         office.login(conf["outlook"]["user"], conf["outlook"]["pass"])
+            office_or_none = office
 
         # print(dest.capabilities())
         for folder in source.list_folders():
@@ -156,7 +159,9 @@ def main():
             if folder[2] in last_states:
                 last_uid = last_states[folder[2]]
 
-            uid, new_arrivals = fetch_folder(source, gmail, office, folder[2], last_uid)
+            uid, new_arrivals = fetch_folder(
+                source, gmail, office_or_none, folder[2], last_uid
+            )
             print("new last uid:", uid)
             last_states[folder[2]] = uid
             if new_arrivals is not None:
