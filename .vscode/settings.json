@@ -1,0 +1,4 @@
+{
+    // Black は "選択範囲の書式設定" コマンドをサポートしていません
+    "editor.formatOnPaste": false
+}
