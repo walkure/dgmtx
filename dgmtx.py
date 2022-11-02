@@ -31,9 +31,11 @@ args = parser.parse_args()
 
 conf = configparser.ConfigParser()
 
+print("conf:[{}] state:[{}]".format(args.config, args.state))
+
 conf.read(pathlib.Path(args.config), "UTF-8")
 
-laststate_file = pathlib.Path(args.state + "")
+laststate_file = pathlib.Path(args.state)
 
 
 def get_access_token(client_id, client_secret, refresh_token):
