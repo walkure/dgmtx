@@ -16,18 +16,26 @@ Python3.5以上で動くはずです。`requirements.txt`を参考にパッケ�
 
 systemdで動かす際のServiceとTimerのUnit fileを参考までに添付してあります。
 
+## コンテナでの起動
+
+コンテナでは設定ファイルが`/conf/config.ini`に存在し、状態ファイルを`/state/laststate.json`に書きこめると期待して起動します。
+
+`docker run -it --mount type=bind,source="$(pwd)"/conf,target=/conf,readonly --mount type=bind,source="$(pwd)"/state,target=/state ghcr.io/walkure/dgmtx:1.0.0`
+
 # GMailのログイン情報について
 GMailのIMAP接続は普通の`USER/PASS`ではログインできず、OAUTHBEARERを使う必要があります。
 そのため、事前にGoogle Cloud PlatformでOAuth2.0認証情報を取得しておいてください。
 
 cf. [OAuth2.0を使用してGoogleAPIにアクセスする](https://developers.google.com/identity/protocols/oauth2)
 
+# 状態ファイルについて
+終了時に、次回起動に備えて状態ファイルを保存します。ここにはドコモメールIMAPフォルダを何処まで読んだかの情報と、GMailへのアクセストークンが入っています。
+
 # 参照
 [ドコモメールをSIMフリースマホで使う - (｡･ω･｡)ノ･☆':*;':* ](http://www2.hatenadiary.jp/entry/2021/06/03/022857)
 
 # AUTHOR
 walkure at 3pf.jp
-
 
 # LICENSE
 MIT
