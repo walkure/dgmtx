@@ -14,16 +14,26 @@ from oauthlib.oauth2 import BackendApplicationClient
 
 ignore_folders = {"Sent", "Trash", "Drafts", "下書き", "ゴミ箱", "迷惑メール＿ドコモ用", "送信済み"}
 
-parser = argparse.ArgumentParser(description="docomo mail to GMail Transfer tool")
-parser.add_argument("-c", "--conf-dir", default="./", help="path to config.ini")
-parser.add_argument("-s", "--state-dir", default="./", help="path to laststate.json")
+parser = argparse.ArgumentParser(
+    description="docomo mail to GMail Transfer tool",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
+parser.add_argument(
+    "-c",
+    "--config",
+    default="./config.ini",
+    help="path to configuration file",
+)
+parser.add_argument(
+    "-s", "--state", default="./laststate.json", help="path to state file"
+)
 args = parser.parse_args()
 
 conf = configparser.ConfigParser()
 
-conf.read(pathlib.Path(args.conf_dir + "config.ini"), "UTF-8")
+conf.read(pathlib.Path(args.config), "UTF-8")
 
-laststate_file = pathlib.Path(args.state_dir + "laststate.json")
+laststate_file = pathlib.Path(args.state + "")
 
 
 def get_access_token(client_id, client_secret, refresh_token):
