@@ -20,7 +20,7 @@ systemdで動かす際のServiceとTimerのUnit fileを参考までに添付し�
 
 コンテナでは設定ファイルが`/conf/config.ini`に存在し、状態ファイルを`/state/laststate.json`に書きこめると期待して起動します。
 
-`docker run -it --mount type=bind,source="$(pwd)"/conf,target=/conf,readonly --mount type=bind,source="$(pwd)"/state,target=/state ghcr.io/walkure/dgmtx:1.0.0`
+`docker run -it --mount type=bind,source="$(pwd)"/conf,target=/conf,readonly --mount type=bind,source="$(pwd)"/state,target=/state ghcr.io/walkure/dgmtx:1.0.1`
 
 # GMailのログイン情報について
 GMailのIMAP接続は普通の`USER/PASS`ではログインできず、OAUTHBEARERを使う必要があります。
