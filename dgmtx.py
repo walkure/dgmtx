@@ -110,8 +110,13 @@ def send_new_arrival_notify(new_arrivals):
 
     payload = json.dumps(obj).encode("utf-8")
 
+    for profile in conf["slack"]:
+        post_slack(profile, conf["slack"][profile], payload)
+
+
+def post_slack(profile, endpoint, payload):
     req = request.Request(
-        conf["slack"]["endpoint"],
+        endpoint,
         data=payload,
         method="POST",
         headers={"content-type": "application/json", "User-Agent": ""},
@@ -120,9 +125,9 @@ def send_new_arrival_notify(new_arrivals):
     try:
         with request.urlopen(req) as response:
             body = response.read().decode("utf-8")
-            print(body)
+        print("OK({}):{}".format(profile, body))
     except error.HTTPError as e:
-        print("Error:" + e)
+        print("Error({}):{}".format(profile, e))
 
 
 def login_gmail(client, access_token):
