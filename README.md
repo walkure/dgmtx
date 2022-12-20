@@ -16,11 +16,14 @@ Python3.5以上で動くはずです。`requirements.txt`を参考にパッケ�
 
 systemdで動かす際のServiceとTimerのUnit fileを参考までに添付してあります。
 
+stateがない初回起動時にメールを全て転送したい場合は引数 `-i` をつけてください。
+このときSlack通知が有効になっていると全部通知を飛ばそうとしてしまうので要注意。
+
 ## コンテナでの起動
 
 コンテナでは設定ファイルが`/conf/config.ini`に存在し、状態ファイルを`/state/laststate.json`に書きこめると期待して起動します。
 
-`docker run -it --mount type=bind,source="$(pwd)"/conf,target=/conf,readonly --mount type=bind,source="$(pwd)"/state,target=/state ghcr.io/walkure/dgmtx:1.0.1`
+`docker run -it --mount type=bind,source="$(pwd)"/conf,target=/conf,readonly --mount type=bind,source="$(pwd)"/state,target=/state ghcr.io/walkure/dgmtx:latest`
 
 # GMailのログイン情報について
 GMailのIMAP接続は普通の`USER/PASS`ではログインできず、OAUTHBEARERを使う必要があります。
