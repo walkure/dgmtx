@@ -53,10 +53,10 @@ def get_access_token(client_id, client_secret, refresh_token):
 
 
 def fetch_folder(source, dest1, dest2, folder, past_uid):
-    status = source.folder_status(folder, ["UIDNEXT"])
+
+    status = source.select_folder(folder, True)  # read-only
     print("Folder:", folder, " past_uid:", past_uid, " uidnext:", status[b"UIDNEXT"])
 
-    source.select_folder(folder, True)  # read-only
     uids = source.search(["UID", "{}:{}".format(past_uid, status[b"UIDNEXT"])])
     uids.sort()
 
