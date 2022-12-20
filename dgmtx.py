@@ -27,11 +27,20 @@ parser.add_argument(
 parser.add_argument(
     "-s", "--state", default="./laststate.json", help="path to state file"
 )
+
+parser.add_argument(
+    "-i",
+    "--initcopy",
+    action="store_true",
+    help="copy whole mails when state not found",
+)
 args = parser.parse_args()
 
 conf = configparser.ConfigParser()
 
-print("conf:[{}] state:[{}]".format(args.config, args.state))
+print(
+    "conf:[{}] state:[{}] initcopy:[{}]".format(args.config, args.state, args.initcopy)
+)
 
 conf.read(pathlib.Path(args.config), "UTF-8")
 
@@ -57,6 +66,10 @@ def fetch_folder(source, dest1, dest2, folder, past_uid):
     status = source.select_folder(folder, True)  # read-only
     print("Folder:", folder, " past_uid:", past_uid, " uidnext:", status[b"UIDNEXT"])
 
+    if past_uid < 0:
+        print("init folder:{} past_uid:{}".format(folder, status[b"UIDNEXT"]))
+        return status[b"UIDNEXT"], None
+
     uids = source.search(["UID", "{}:{}".format(past_uid, status[b"UIDNEXT"])])
     uids.sort()
 
@@ -66,6 +79,7 @@ def fetch_folder(source, dest1, dest2, folder, past_uid):
 
     new_arrivals = []
     for uid in uids:
+        # print("F:{} UID:{}".format(folder, uid))
         new_arrivals.append(transfer_mail(source, dest1, dest2, folder, uid))
 
     return uids[-1] + 1, new_arrivals
@@ -178,7 +192,7 @@ def main():
             if folder[2] in ignore_folders:
                 continue
 
-            last_uid = 1
+            last_uid = 1 if args.initcopy else -1
             if folder[2] in last_states:
                 last_uid = last_states[folder[2]]
 
