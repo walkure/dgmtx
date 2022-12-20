@@ -60,7 +60,7 @@ def fetch_folder(source, dest1, dest2, folder, past_uid):
     uids = source.search(["UID", "{}:{}".format(past_uid, status[b"UIDNEXT"])])
     uids.sort()
 
-    print(uids)
+    print("UIDs:", uids)
     if len(uids) == 0:
         return past_uid, None
 
