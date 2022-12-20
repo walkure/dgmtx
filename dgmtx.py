@@ -159,7 +159,7 @@ def main():
         with open(str(laststate_file)) as file:
             last_states = json.load(file)
     else:
-        last_states = {}
+        last_states = {"access_token": None}
 
     new_arrivals_all = []
     with IMAPClient(host="imap.spmode.ne.jp") as source, IMAPClient(
