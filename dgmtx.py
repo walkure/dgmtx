@@ -10,7 +10,7 @@ from urllib import error, request
 
 from imapclient import IMAPClient
 from imapclient.exceptions import LoginError
-from oauthlib.oauth2 import BackendApplicationClient
+from oauthlib.oauth2 import BackendApplicationClient, WebApplicationClient
 
 ignore_folders = {"Sent", "Trash", "Drafts", "下書き", "ゴミ箱", "迷惑メール＿ドコモ用", "送信済み"}
 
@@ -168,7 +168,35 @@ def login_gmail(client, access_token):
         return access_token
 
 
+def authorize_gmail(client_id, client_secret):
+    client = WebApplicationClient(client_id)
+    url, headers, body = client.prepare_authorization_request(
+        "https://accounts.google.com/o/oauth2/auth",
+        redirect_url="https://localhost/",
+        scope="https://mail.google.com/",
+    )
+    print("access to:", url)
+
+    authorized_uri = input("paste redirected URI:")
+    url, headers, body = client.prepare_token_request(
+        "https://oauth2.googleapis.com/token",
+        authorization_response=authorized_uri,
+        client_secret=client_secret,
+    )
+
+    req = request.Request(url, body.encode(), headers=headers)
+    with request.urlopen(req) as res:
+        client.parse_request_body_response(res.read())
+
+    print("refresh token:", client.refresh_token)
+
+
 def main():
+
+    if "refresh_token" not in conf["gmail"]:
+        authorize_gmail(conf["gmail"]["client_id"], conf["gmail"]["client_secret"])
+        return
+
     if laststate_file.exists():
         with open(str(laststate_file)) as file:
             last_states = json.load(file)

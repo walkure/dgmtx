@@ -19,6 +19,15 @@ systemdで動かす際のServiceとTimerのUnit fileを参考までに添付し�
 stateがない初回起動時にメールを全て転送したい場合は引数 `-i` をつけてください。
 このときSlack通知が有効になっていると全部通知を飛ばそうとしてしまうので要注意。
 
+## 初回起動時
+
+[Google CloudのAPIコンソール](https://console.cloud.google.com/apis/dashboard)でGmail APIを有効にしたClientを作るとClient ID/Secretが発行されます。
+
+これを`config.ini`に書いて(`refresh_token`がない状態)で起動すると、OAuth2認可フローのURIを表示します。アクセスしたいGmailにログインしたブラウザで
+当該URIを開くと認可してくれ画面が出ます。認可すると`https://localhost/`に繋ぎに行こうとするのでその時点でのブラウザのURIを貼り付けてください。
+
+うまくいけば`refresh_token`を取得して表示するので、`config.ini`に転記してください。
+
 ## コンテナでの起動
 
 コンテナでは設定ファイルが`/conf/config.ini`に存在し、状態ファイルを`/state/laststate.json`に書きこめると期待して起動します。
