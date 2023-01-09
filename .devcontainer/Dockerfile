@@ -10,7 +10,7 @@ RUN apt-get -y update && apt-get upgrade -qqy && apt-get -y install \
 RUN bash -c "$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode-dev-containers/main/script-library/common-debian.sh")" \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /workspace
+WORKDIR /workspaces
 USER vscode
 
 RUN pip install -U setuptools flake8 black
