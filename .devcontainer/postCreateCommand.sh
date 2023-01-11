@@ -1,1 +1,1 @@
-pip3 install -r requirements.lock
+pip install -r requirements.lock
