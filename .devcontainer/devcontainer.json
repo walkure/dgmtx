@@ -2,9 +2,12 @@
     "name": "dev",
     "image":"python:3.11.0-slim-buster",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {}
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "username":"vscode"
+        }
     },
-    "onCreateCommand": "chmod +x ./.devcontainer/onCreateCommand.sh && ./.devcontainer/onCreateCommand.sh",
+    "containerUser":"vscode",
+    "onCreateCommand": "sudo chmod +x ./.devcontainer/onCreateCommand.sh && sudo ./.devcontainer/onCreateCommand.sh",
     "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     "extensions": [
         "ms-azuretools.vscode-docker",
