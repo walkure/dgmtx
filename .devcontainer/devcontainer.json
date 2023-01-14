@@ -1,7 +1,10 @@
 {
     "name": "dev",
-    "dockerFile": "Dockerfile",
-    "postCreateCommand": "chmod +x ./.devcontainer/postCreateCommand.sh && ./.devcontainer/postCreateCommand.sh",
+    "image":"python:3.11.0-slim-buster",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "onCreateCommand": "chmod +x ./.devcontainer/onCreateCommand.sh && ./.devcontainer/onCreateCommand.sh",
     "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     "extensions": [
         "ms-azuretools.vscode-docker",
