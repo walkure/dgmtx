@@ -8,6 +8,7 @@
     },
     "containerUser":"vscode",
     "onCreateCommand": "sudo chmod +x ./.devcontainer/onCreateCommand.sh && sudo ./.devcontainer/onCreateCommand.sh",
+    "updateContentCommand":"sudo chmod +x ./.devcontainer/updateContentCommand.sh && sudo ./.devcontainer/updateContentCommand.sh",
     "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     "extensions": [
         "ms-azuretools.vscode-docker",
