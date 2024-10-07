@@ -1,13 +1,13 @@
-ARG PYTHON_VER=3.11.0
+ARG PYTHON_VER=3.12.7
 
-FROM python:${PYTHON_VER}-slim-buster as builder
+FROM python:${PYTHON_VER}-slim-bookworm AS builder
 
 COPY requirements.lock .
 RUN pip3 install -r requirements.lock
 
-FROM python:${PYTHON_VER}-slim-buster as runner
+FROM python:${PYTHON_VER}-slim-bookworm AS runner
 
-ARG PYTHON_VER=3.11
+ARG PYTHON_VER=3.12
 
 RUN addgroup --gid 65532 nonroot && adduser --uid 65532 --ingroup nonroot nonroot
 USER nonroot

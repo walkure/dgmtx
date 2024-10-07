@@ -1,6 +1,6 @@
 {
     "name": "dev",
-    "image":"python:3.11.0-slim-buster",
+    "image":"python:3.12.7-slim-bookworm",
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "username":"vscode"
