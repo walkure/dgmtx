@@ -12,6 +12,8 @@ from imapclient import IMAPClient
 from imapclient.exceptions import LoginError
 from oauthlib.oauth2 import BackendApplicationClient, WebApplicationClient
 
+import ssl
+
 ignore_folders = {"Sent", "Trash", "Drafts", "下書き", "ゴミ箱", "迷惑メール＿ドコモ用", "送信済み"}
 
 parser = argparse.ArgumentParser(
@@ -203,8 +205,11 @@ def main():
     else:
         last_states = {"access_token": None}
 
+    legacyCtx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    legacyCtx.options |= ssl.OP_LEGACY_SERVER_CONNECT
+
     new_arrivals_all = []
-    with IMAPClient(host="imap.spmode.ne.jp") as source, IMAPClient(
+    with IMAPClient(host="imap.spmode.ne.jp", ssl_context=legacyCtx) as source, IMAPClient(
         host="imap.googlemail.com"
     ) as gmail, IMAPClient(host="outlook.office365.com") as office:
 
