@@ -91,7 +91,7 @@ def transfer_mail(source, dest1, dest2, folder, uid):
     resp = source.fetch(
         [uid], ["RFC822", "INTERNALDATE", "BODY[HEADER.FIELDS (SUBJECT FROM)]"]
     )
-    body = resp[uid][b"RFC822"].decode("us-ascii")
+    body = resp[uid][b"RFC822"]
     idate = resp[uid][b"INTERNALDATE"]
     headers = BytesParser(policy=default).parsebytes(
         resp[uid][b"BODY[HEADER.FIELDS (SUBJECT FROM)]"], True
